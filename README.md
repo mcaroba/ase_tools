@@ -27,7 +27,7 @@ Execute the build script:
     cd ase_tools/
     ./build_libraries.sh
 
-Add the root directory to your Python path:
+Add the source directory to your Python path to use the libraries directly:
 
-    echo "export PYTHONPATH=$(pwd):\$PYTHONPATH" >> ~/.bashrc
+    echo "export PYTHONPATH=$(pwd)/src:\$PYTHONPATH" >> ~/.bashrc
     source ~/.bashrc
