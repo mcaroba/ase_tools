@@ -8,11 +8,14 @@ module cluster_module
 
       implicit none
 
+!     Input variables
       integer, intent(in) :: i, j, n_atoms, cluster
-      integer, intent(inout) :: atom_belongs_to_cluster(:)
-      integer :: k
-      logical, intent(inout) :: atom_visited(:)
       logical, intent(in) :: bonded(:,:)
+!     Inout variables
+      integer, intent(inout) :: atom_belongs_to_cluster(:)
+      logical, intent(inout) :: atom_visited(:)
+!     Internal variables
+      integer :: k
 
       if( .not. atom_visited(j) .and. i /= j .and. bonded(i,j) )then
         atom_visited(j) = .true.
