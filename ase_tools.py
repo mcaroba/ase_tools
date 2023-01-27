@@ -12,7 +12,7 @@ from src.surface import surface_tools
 #
 # r_min  :: this is the minimum distance allowed between an atom and a probe sphere in Ang.
 # r_max  :: this is the maximum distance allowed between an atom and a probe sphere in Ang.
-# n_tris :: this is the number of probe spheres that will be used to probe the simulation
+# n_tries :: this is the number of probe spheres that will be used to probe the simulation
 #           box
 #
 def surface_list(atoms, r_min, r_max, n_tries, cluster=False):
