@@ -1,6 +1,6 @@
 # ase_tools license
 
-**ase_tools** is copyright (c) 2022 by Rina Ibragimova and Miguel A. Caro. It is
+**ase_tools** is copyright (c) 2022-2023 by Rina Ibragimova and Miguel A. Caro. It is
 distributed under the GNU General Public License version 3, a copy of which is provided
 at the end of this document.
 

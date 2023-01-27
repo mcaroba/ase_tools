@@ -2,7 +2,7 @@
 
 Fast Fortran libraries to be used in combination with ASE
 
-**ase_tools** is copyright (c) 2022 by Rina Ibragimova and Miguel A. Caro. It is
+**ase_tools** is copyright (c) 2022-2023 by Rina Ibragimova and Miguel A. Caro. It is
 distributed under the GNU General Public License version 3. It relies on a working
 installation of ASE and Numpy.
 
