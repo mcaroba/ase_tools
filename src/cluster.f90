@@ -63,7 +63,7 @@ module cluster_module
       implicit none
 
 !     Input variables
-      real*8, intent(in) :: positions(:,:), lx, ly, lz, bonding_cutoff
+      real*8, intent(in) :: positions(:,:), lx, ly, lz, bonding_cutoff(:)
 !     Output variables
       integer, intent(out), dimension(1:size(positions,2)) :: atom_belongs_to_cluster
 !     Internal variables
@@ -80,7 +80,7 @@ module cluster_module
       do i = 1, n_atoms
         do j = i+1, n_atoms
           call get_distance(positions(1:3, i), positions(1:3, j), lx, ly, lz, d)
-          if( d < bonding_cutoff )then
+          if( d < (bonding_cutoff(i)+bonding_cutoff(j))/2.d0 )then
             bonded(i, j) = .true.
             bonded(j, i) = .true.
           end if

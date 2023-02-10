@@ -49,3 +49,19 @@ The higher the value of `n_tries` the more accurate the estimate (and the closer
 `r_min`).
 
 ![Rooling-sphere algorithm](docs/img/rolling_sphere.png)
+
+NOTE: currently, this tool does not allow you to handle systems under periodic boundary conditions, i.e.,
+you'll need to pass the `cluster=True` option as argument, otherwise the code will throw an error.
+
+### Splitting a system into individual molecules
+
+If you have a simulation box with a series of atoms bonded such that they form molecules, and want to
+have those molecules separated into individual ASE's `Atoms(...)` objects, you can use ase_tools'
+`split_atoms(...)` function:
+
+    db = split_atoms(atoms, bonding_cutoff={"H": 1.3, "C": 1.8})
+
+`split_atoms()` returns a list of `Atoms()` objects, each with the molecules that could be constructed
+by assuming two atoms are bonded if `distance[i,j] < (cutoff[i]+cutoff[j])/2.`. The bonding cutoff can
+be a scalar, an array with the same length as the number of atoms in the input `Atoms()` object, or
+a dictionary containing a cutoff value for each species present in the system, as in the example above.
