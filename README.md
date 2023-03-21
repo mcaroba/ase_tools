@@ -29,7 +29,7 @@ Execute the build script:
 
 Add the source directory to your Python path to use the libraries directly:
 
-    echo "export PYTHONPATH=$(pwd)/src:\$PYTHONPATH" >> ~/.bashrc
+    echo "export PYTHONPATH=$(pwd):\$PYTHONPATH" >> ~/.bashrc
     source ~/.bashrc
 
 ## Available tools
