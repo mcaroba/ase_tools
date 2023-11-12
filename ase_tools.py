@@ -74,3 +74,30 @@ def split_atoms(atoms, bonding_cutoff):
 #   Return the list of Atoms() objects
     return atoms_list
 ###############################################################################################
+#
+# This function reads a PDB file and optionally removes spurious periodic copies of the atoms
+#
+def read_pdb(filename, remove_spurious_atoms=False):
+    f = open(filename, "r")
+    lines = f.readlines()
+    f.close()
+    symbols = []
+    positions = []
+    for line in lines:
+        words = line.split()
+        if len(words) > 0 and words[0] == "CRYST1":
+            a, b, c, alpha, beta, gamma = [float(num) for num in words[1:7]]
+        if len(words) > 0 and words[0] == "ATOM":
+            symb = words[2]
+            pos = [float(num) for num in words[3:6]]
+            symbols.append(symb); positions.append(pos)
+    atoms = Atoms(symbols, positions=positions, cell = [a, b, c, alpha, beta, gamma], pbc=True)
+    if remove_spurious_atoms:
+        for i in range(len(atoms)-1, -1, -1):
+            for j in range(i-1, -1, -1):
+                d = atoms.get_distance(i, j, mic=True)
+                if d < 0.01:
+                    del atoms[i]
+                    break
+    return atoms
+###############################################################################################

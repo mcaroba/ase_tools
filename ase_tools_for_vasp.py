@@ -2,6 +2,7 @@
 # See License.md for more information
 
 import numpy as np
+from ase.io import read
 
 ###############################################################################################
 #
@@ -67,4 +68,105 @@ def make_kpoints_file(atoms, filename="KPOINTS", kspacing=0.5, kgamma=True,
     print(*nk, file=f)
     print(*shift, file=f)
     f.close()
+###############################################################################################
+
+
+
+
+###############################################################################################
+#
+# This function provides a more powerful wrapper for ASE's native OUTCAR reader.
+#
+def read_vasp(outcar, check_convergence=True, extract_hirshfeld=True):
+#   Use ASE reader to initialize the Atoms() object
+    atoms = read(outcar)
+#   Regular Python's read to import the OUTCAR's contents
+    f = open(outcar, "r")
+    lines = f.readlines()
+    f.close()
+#   Check that the electronic SCF is converged
+    if check_convergence:
+        n = 0
+        nelm = None
+        toten_list = []
+        for line in lines:
+            if len(line.split()) > 0:
+                if line.split()[0] == "NELM":
+                    nelm = int(line.split()[2][0:-1])
+            if any([word == "TOTEN" for word in line.split()]):
+                n += 1
+                toten_list.append(float(line.split()[4]))
+        if not nelm:
+            raise RuntimeError("Your input file does not appear to be a valid VASP OUTCAR file!")
+        if len(toten_list) >= 3:
+            ediff = np.abs(toten_list[-3]-toten_list[-2])
+            atoms.info["scf_ediff"] = ediff
+        if n >= nelm+1:
+            raise RuntimeError("Your VASP SCF calculation appears to not be converged " + \
+                               "(the allowed maximum of NELM iterations was reached)! " + \
+                               "You can disregard this error (at your own risk!) by setting " + \
+                               "check_convergence=False. If you choose to do so, the energy " + \
+                               "difference between the last two SCF steps (%.5e eV in this case)" % (ediff) + \
+                               "will be returned with tag scf_ediff in the Atoms object's info dictionary.")
+#   If a TS or MBD calculation was done, get Hirshfeld parameters
+    if extract_hirshfeld:
+        ivdw = 0
+        it_hirshfeld = False
+        for line in lines:
+            if len(line.split()) == 0:
+                continue
+            if line.split()[0] == "IVDW":
+                if line.split()[2] == "2" or line.split()[2] == "20":
+                    ivdw = 20
+                elif line.split()[2] == "21":
+                    ivdw = 21
+                    it_hirshfeld = True
+                elif line.split()[2] == "202":
+                    ivdw = 202
+                elif line.split()[2] == "212":
+                    ivdw = 212
+                    it_hirshfeld = True
+                break
+        if ivdw != 0:
+            hirsh_v, hirsh_q = extract_hirshfeld_volumes(lines)
+            atoms.set_array("hirshfeld_v", hirsh_v)
+            if len(hirsh_q) >= 1:
+                atoms.set_array("hirshfeld_q", hirsh_q[0])
+            if len(hirsh_q) == 2:
+                atoms.set_array("hirshfeld_q_it", hirsh_q[1])
+    return atoms
+
+def extract_hirshfeld_volumes(lines):
+    v = []
+    q = []
+    q_it = []
+    for i in range(0, len(lines)):
+        if lines[i].split() == ["Parameters", "of", "vdW", "forcefield:"]:
+            j = i + 4
+            while True:
+                if len(lines[j].split()) == 0:
+                    break
+                else:
+                    v.append(float(lines[j].split()[4]))
+                    j += 1
+        if lines[i].split() == ["Hirshfeld", "charges:"]:
+            j = i + 3
+            while True:
+                if len(lines[j].split()) == 0:
+                    break
+                else:
+                    q.append(float(lines[j].split()[2]))
+                    j += 1
+        if lines[i].split() == ["Hirshfeld-I", "charges:"]:
+            j = i + 3
+            while True:
+                if len(lines[j].split()) == 0:
+                    break
+                else:
+                    q_it.append(float(lines[j].split()[2]))
+                    j += 1
+    if len(q_it) > 0:
+        return np.array(v), [np.array(q), np.array(q_it)]
+    else:
+        return np.array(v), [np.array(q)]
 ###############################################################################################

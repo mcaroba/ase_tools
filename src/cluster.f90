@@ -10,19 +10,30 @@ module cluster_module
 
 !     Input variables
       integer, intent(in) :: i, j, n_atoms, cluster
-      logical, intent(in) :: bonded(:,:)
+!      logical, intent(in) :: bonded(:,:)
+      logical, intent(in) :: bonded(:)
 !     Inout variables
       integer, intent(inout) :: atom_belongs_to_cluster(:)
       logical, intent(inout) :: atom_visited(:)
 !     Internal variables
-      integer :: k
+      integer :: k, i2, j2
 
-      if( .not. atom_visited(j) .and. i /= j .and. bonded(i,j) )then
+!      if( .not. atom_visited(j) .and. i /= j .and. bonded(i,j) )then
+      if( .not. atom_visited(j) .and. i /= j )then
+      if( j > i )then
+        j2 = j
+        i2 = i
+      else
+        j2 = i
+        i2 = j
+      end if
+      if( bonded((j2**2 - 3*j2 + 2)/2 + i2) )then
         atom_visited(j) = .true.
         atom_belongs_to_cluster(j) = cluster
         do k = 1, n_atoms
           call find_neighbors(j, k, n_atoms, bonded, atom_visited, atom_belongs_to_cluster, cluster)
         end do
+      end if
       end if
     end subroutine
 
@@ -69,11 +80,13 @@ module cluster_module
 !     Internal variables
       real*8 :: d
       integer :: n_atoms, cluster, i, j
-      logical, allocatable :: bonded(:,:), atom_visited(:)
+!      logical, allocatable :: bonded(:,:), atom_visited(:)
+      logical, allocatable :: bonded(:), atom_visited(:)
 
       n_atoms = size(positions,2)
 
-      allocate( bonded(1:n_atoms, 1:n_atoms) )
+!      allocate( bonded(1:n_atoms, 1:n_atoms) )
+      allocate( bonded( 1:((n_atoms**2 - 3*n_atoms + 2)/2 + n_atoms-1) ) )
       bonded = .false.
 
       !$omp parallel do private(i,j,d)
@@ -81,8 +94,9 @@ module cluster_module
         do j = i+1, n_atoms
           call get_distance(positions(1:3, i), positions(1:3, j), lx, ly, lz, d)
           if( d < (bonding_cutoff(i)+bonding_cutoff(j))/2.d0 )then
-            bonded(i, j) = .true.
-            bonded(j, i) = .true.
+!            bonded(i, j) = .true.
+!            bonded(j, i) = .true.
+            bonded((j**2 - 3*j + 2)/2 + i) = .true.
           end if
         end do
       end do
