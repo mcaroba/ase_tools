@@ -1,4 +1,4 @@
-# ase_tools is copyright (c) 2022-2023 of Miguel Caro and Rina Ibragimova
+# ase_tools is copyright (c) 2022-2025 of Miguel Caro and Rina Ibragimova
 # See License.md for more information
 
 import numpy as np

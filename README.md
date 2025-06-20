@@ -2,9 +2,13 @@
 
 Fast Fortran libraries to be used in combination with ASE
 
-**ase_tools** is copyright (c) 2022-2023 by Rina Ibragimova and Miguel A. Caro. It is
+**ase_tools** is copyright (c) 2022-2025 by Rina Ibragimova and Miguel A. Caro. It is
 distributed under the GNU General Public License version 3. It relies on a working
-installation of ASE and Numpy.
+installation of ASE and Numpy. **ase_tools_for_vasp** is distributed jointly with
+**ase_tools** and does *not* require a VASP installation. **ase_tools_for_ovito**
+is also distributed with **ase_tools** and requires a working installation of Ovito.
+Both **ase_tools_for_vasp** and **ase_tools_for_ovito** are distributed under the
+same license as **ase_tools**.
 
 See the LICENSE.md file for detailed information on this
 software's license.
@@ -99,3 +103,16 @@ Example usage, where `atoms` is a valid ASE `Atoms()` object:
     from ase_tools_for_vasp import make_kpoints_file
     make_kpoints_file(atoms, filename="KPOINTS", kspacing=0.5, kgamma=True,
                       shift=[0.,0.,0.], vacuum_check=True, vacuum_cutoff=5.):
+
+### Reading VASP's OUTCAR files
+
+The `read_outcar()` function provides extra functionality for reading OUTCAR files built on top
+of ASE's native `read()` function. More complete documentation coming up... check source code
+in the meantime for details.
+
+## ASE tools for Ovito
+
+The Pipeline class is provided as a helper class to handle Ovito's modifier-based workflow needed
+to render atomic scenes. It takes an ASE Atoms object as argument and handles all the visualization
+tasks through functions in a more intuitive way (as exposed to the user) than Ovito's native way
+of defining modifier functions and appending them to the pipeline.
