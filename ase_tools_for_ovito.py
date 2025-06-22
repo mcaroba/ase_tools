@@ -15,7 +15,7 @@ from ovito.vis import Viewport, TachyonRenderer
 ###############################################################################################
 #
 class Pipeline:
-    def __init__(self, atoms, radii=None, cutoffs=None, colors=None):
+    def __init__(self, atoms, radii=None, cutoffs=None, colors=None, color_scale="linear"):
         self.atoms = atoms # This is an ASE Atoms object
 
         # Ovito has trouble with a bunch of array properties assigned to Atoms objects. The fix_atoms
@@ -60,13 +60,17 @@ class Pipeline:
                 cutoffs[el] = covalent_radii[numb] * 2.5
             self.cutoffs = cutoffs
 
-        # Set various self properties
+        # Set various self color properties
         if type(colors) is str:
             self.colors = colors.lower()
         else:
             self.colors = colors
         self.mincolor = np.array([0., 0., 1.])
         self.maxcolor = np.array([1., 0., 0.])
+        if color_scale.lower() == "linear" or color_scale.lower() == "log":
+            self.color_scale = color_scale.lower()
+        else:
+            raise("Bad value for color_scale!")
 
         # Store Ovito pipeline in self to be accessible by modifiers
         self.pipeline = pipeline
@@ -124,7 +128,12 @@ class Pipeline:
             amax = np.max(array)
             for i in range(0, len(self.atoms)):
                 if amax - amin > 0.:
-                    colors[i] = self.mincolor + (self.maxcolor - self.mincolor) / (amax - amin) * (array[i] - amin)
+                    if self.color_scale == "linear":
+                        colors[i] = self.mincolor + (self.maxcolor - self.mincolor) * (array[i] - amin) / (amax - amin)
+                    elif self.color_scale == "log":
+                        # We make the whole range span 4 orders of magnitude
+                        argument = 1.e-4 + (1.e0 - 1.e-4) * (array[i] - amin) / (amax - amin)
+                        colors[i] = self.mincolor + (self.maxcolor - self.mincolor) * (4. + np.log10(argument))/4.
                 else:
                     colors[i] = self.mincolor
             self.colors = colors
