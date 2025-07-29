@@ -133,7 +133,7 @@ class Pipeline:
                     elif self.color_scale == "log":
                         # We make the whole range span nord orders of magnitude
                         nord = 4
-                        argument = 10**(-nord) + (1. - 10**(-nord) * (array[i] - amin) / (amax - amin)
+                        argument = 10**(-nord) + (1. - 10**(-nord)) * (array[i] - amin) / (amax - amin)
                         colors[i] = self.mincolor + (self.maxcolor - self.mincolor) * (nord + np.log10(argument))/nord
                 else:
                     colors[i] = self.mincolor
