@@ -116,3 +116,43 @@ The Pipeline class is provided as a helper class to handle Ovito's modifier-base
 to render atomic scenes. It takes an ASE Atoms object as argument and handles all the visualization
 tasks through functions in a more intuitive way (as exposed to the user) than Ovito's native way
 of defining modifier functions and appending them to the pipeline.
+
+These is a basic example for the GeSbTe phase-change material
+which you can look at in more detail and run from the
+`examples/ase_tools_for_ovito/basic_example/` directory:
+
+    from ase.io import read
+    import numpy as np
+    from ase_tools_for_ovito import Pipeline
+
+    # Create an ASE Atoms object
+    atoms = read("GST.xyz")
+
+    # Run with defaults
+    # Create a Pipeline object from atoms with all options set to defaults
+    pipeline = Pipeline(atoms)
+    # Set the visual elements with defaults
+    pipeline.set_visuals()
+    # Export to a PNG file
+    pipeline.render("defaults.png")
+
+    # Just change the colors
+    pipeline = Pipeline(atoms, colors={"Ge": [1,0,0], "Sb": [0,1,0], "Te": [0,0,1]})
+    pipeline.set_visuals()
+    pipeline.render("rgb_colors.png")
+
+    # Just change the atom sizes
+    pipeline = Pipeline(atoms, radii={"Ge": 0.1, "Sb": 0.2, "Te": 0.3})
+    pipeline.set_visuals()
+    pipeline.render("change_sizes.png")
+
+    # Provide colors with an array (random here, but you might have actual useful info to display!)
+    pipeline = Pipeline(atoms, colors=np.random.sample([len(atoms), 3]))
+    pipeline.set_visuals()
+    pipeline.render("random_colors.png")
+
+![Changing Ovito coloring](docs/img/changing_ovito_colors.png)
+
+You can change a lot of properties in an easy way, for instance provide color coding according to some
+property of your atomic system. While we document the whole tool and provide more examples, check the
+source code (`ase_tools_for_ovito.py`) for details.

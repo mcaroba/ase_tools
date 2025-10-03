@@ -20,7 +20,12 @@ class Pipeline:
 
         # Ovito has trouble with a bunch of array properties assigned to Atoms objects. The fix_atoms
         # property assigned by TurboGAP needs to be removed!
-        del self.atoms.arrays["fix_atoms"]
+        del_prop_list = ["fix_atoms"]
+        for it in del_prop_list:
+            try:
+                del self.atoms.arrays[it]
+            except:
+                pass
 
         # Create the data objects
         atoms_data = ase_to_ovito(self.atoms)
@@ -106,16 +111,17 @@ class Pipeline:
 
     # Color particles
     def set_particle_color(self):
-        if self.colors == None or self.colors == "jmol": # JMOL color scheme (ASE's default)
-            colors = {}
-            for el in self.el_num:
-                colors[el] = jmol_colors[atomic_numbers[el]]
-            self.colors = colors
-        elif self.colors == "cpk": # CPK color scheme
-            colors = {}
-            for el in self.el_num:
-                colors[el] = cpk_colors[atomic_numbers[el]]
-            self.colors = colors
+        if self.colors is None or type(self.colors) is str:
+            if self.colors == None or self.colors == "jmol": # JMOL color scheme (ASE's default)
+                colors = {}
+                for el in self.el_num:
+                    colors[el] = jmol_colors[atomic_numbers[el]]
+                self.colors = colors
+            elif self.colors == "cpk": # CPK color scheme
+                colors = {}
+                for el in self.el_num:
+                    colors[el] = cpk_colors[atomic_numbers[el]]
+                self.colors = colors
         if type(self.colors) is dict: # If self.colors is a dictionary, we create the color array from it
             colors = np.zeros([len(self.atoms), 3])
             for i in range(0, len(self.atoms)):
@@ -154,11 +160,13 @@ class Pipeline:
     # Visualization and rendering options
     def set_visuals(self, renderer="tachyon",
                     shadows=False, direct_light_intensity=1.1,
-                    direction=[1,1,1], scale=1., shift=[0,0,0]):
+                    direction=[3,2,-1], scale=None, shift=[0,0,0]):
         if renderer == "tachyon":
             self.renderer = TachyonRenderer(shadows=shadows, direct_light_intensity=direct_light_intensity)
         else:
             raise("%s not supported as renderer option")
+        if scale == None:
+            scale = self.atoms.get_volume()**(1./3.) * 3.
         self.vp = Viewport()
         self.vp.type = Viewport.Type.Perspective
         self.vp.camera_dir = direction
