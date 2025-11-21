@@ -79,6 +79,7 @@ class Pipeline:
 
         # Store Ovito pipeline in self to be accessible by modifiers
         self.pipeline = pipeline
+        self.data = data
 
         # Append modifiers
         self.set_particle_size()
@@ -99,7 +100,7 @@ class Pipeline:
         self.pipeline.modifiers.append(modifier)
 
     # Set the cutoff to draw the bonds
-    def create_bonds(self):
+    def create_bonds(self, width=1.):
         modifier = CreateBondsModifier(mode=CreateBondsModifier.Mode.Pairwise) # This uses Ovito's own modifier
         for el in self.el_num:
             n = self.el_num[el]
@@ -108,6 +109,8 @@ class Pipeline:
                 if n2 >= n:
                     modifier.set_pairwise_cutoff(n, n2, (self.cutoffs[el]+self.cutoffs[el2])/2.)
         self.pipeline.modifiers.append(modifier)
+        self.data = self.pipeline.compute()
+        self.data.particles.bonds.vis.width = width
 
     # Color particles
     def set_particle_color(self):
