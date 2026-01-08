@@ -1,10 +1,13 @@
-# ase_tools is copyright (c) 2022-2025 of Miguel Caro and Rina Ibragimova
+# ase_tools is copyright (c) 2022-2026 of Miguel Caro and Rina Ibragimova
 # See License.md for more information
 
 import numpy as np
 from ase import Atoms
 from src.surface import surface_tools
 from src.cluster import cluster_module
+from ase.calculators.calculator import Calculator, all_changes
+from ase.io import write,read
+import subprocess
 
 ###############################################################################################
 #
@@ -100,4 +103,32 @@ def read_pdb(filename, remove_spurious_atoms=False):
                     del atoms[i]
                     break
     return atoms
+###############################################################################################
+#
+# This function creates an incredibly inefficient interface to the TurboGAP code. Note that it
+# requires for the user to have a local input file and local gap_files/ directory. It will return
+# the energy and forces of the last image in the trajectory_out.xyz. It only makes sense to use
+# it with a minimal input file which you would usually use to run "turbogap predict"
+#
+class TurboGAP(Calculator):
+
+    implemented_properties = ['energy', 'forces']
+
+    def __init__(self, atoms=None, verbose=False):
+        Calculator.__init__(self)
+        self.verbose = verbose
+
+    def calculate(self,
+                  atoms=None,
+                  properties=['energy', 'forces'],
+                  system_changes=all_changes):
+        Calculator.calculate(self, atoms, properties, system_changes)
+        write("atoms.xyz", self.atoms)
+        if not self.verbose:
+            subprocess.run(["turbogap", "predict"], stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+        else:
+            subprocess.run(["turbogap", "predict"])
+        atoms_temp = read("trajectory_out.xyz", index=-1)
+        self.results['energy'] = atoms_temp.get_potential_energy()
+        self.results['forces'] = atoms_temp.get_forces()
 ###############################################################################################
