@@ -1,0 +1,3 @@
+[submodule "src/soap_turbo_interface/soap_turbo"]
+	path = src/soap_turbo_interface/soap_turbo
+	url = https://github.com/libatoms/soap_turbo.git
