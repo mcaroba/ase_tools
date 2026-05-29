@@ -157,15 +157,16 @@ custom_target(
   install_dir : py_install_dir / 'soap_turbo',
 )
 
+# This is probably not needed, if the file just goes to python path
 # --------------------------------------------------------------------
 # Install the Python package files
 # --------------------------------------------------------------------
-install_data(
-  'descriptor.py',
-  install_dir : py_install_dir / 'soap_turbo',
-)
-
-install_data(
-  '__init__.py',
-  install_dir : py_install_dir / 'soap_turbo',
-)
+#install_data(
+#  'descriptor.py',
+#  install_dir : py_install_dir / 'soap_turbo',
+#)
+#
+#install_data(
+#  '__init__.py',
+#  install_dir : py_install_dir / 'soap_turbo',
+#)
