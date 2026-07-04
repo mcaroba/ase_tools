@@ -66,12 +66,21 @@ have those molecules separated into individual ASE's `Atoms(...)` objects, you c
 `split_atoms(...)` function:
 
     from ase_tools import split_atoms
-    db = split_atoms(atoms, bonding_cutoff={"H": 1.3, "C": 1.8})
+    db = split_atoms(atoms, bonding_cutoff={"H": 1.3, "C": 1.8}, contiguous_molecules=False)
 
 `split_atoms()` returns a list of `Atoms()` objects, each with the molecules that could be constructed
 by assuming two atoms are bonded if `distance[i,j] < (cutoff[i]+cutoff[j])/2.`. The bonding cutoff can
 be a scalar, an array with the same length as the number of atoms in the input `Atoms()` object, or
 a dictionary containing a cutoff value for each species present in the system, as in the example above.
+
+The `contiguous_molecules` keyword allows you to retrieve contiguous representations of the given molecules,
+i.e., if a molecule is originally split across the periodic boundaries and wrapped back to the unit cell,
+setting `contiguous_molecules=True` will reset the positions of some of the atoms so that the images
+closest to the first atom in the molecule is returned. Note that this can fail if the longest size of
+the molecule is longer than half the shortest cell dimension. This can (and will in the future) be made
+more robust by using atomic connectivity/neighbor lists for selecting the images iteratively. Obtaining
+contiguous representations is useful for visualization but also for, e.g., computing the center of mass
+of a molecule avoiding artifacts introduced by the periodic boundaries.
 
 ## ASE tools for VASP
 

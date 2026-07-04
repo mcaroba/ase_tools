@@ -36,7 +36,7 @@ def surface_list(atoms, r_min, r_max, n_tries, cluster=False):
 # This function splits a series of atoms into individual molecules, according to some bonding
 # cutoffs, and returns a list of Atoms() objects each containin a single molecule.
 #
-def split_atoms(atoms, bonding_cutoff):
+def split_atoms(atoms, bonding_cutoff, contiguous_molecules=False):
     pos = atoms.get_positions()
     cell = atoms.get_cell()
     symb = atoms.get_chemical_symbols()
@@ -74,6 +74,16 @@ def split_atoms(atoms, bonding_cutoff):
                 pos_new.append(pos[i])
                 symb_new += symb[i]
         atoms_list.append(Atoms(symb_new, cell = cell, positions=pos_new, pbc=True))
+#   If the user wants whole molecules, we build each molecule from the first atom in it
+    if contiguous_molecules:
+        for mol in atoms_list:
+            old_pos = mol.get_positions()
+            pos0 = old_pos[0]
+            new_pos = [pos0]
+            for i in range(1, len(old_pos)):
+                d = mol.get_distance(0, i, mic=True, vector=True)
+                new_pos.append(pos0+d)
+            mol.set_positions(new_pos)
 #   Return the list of Atoms() objects
     return atoms_list
 ###############################################################################################
