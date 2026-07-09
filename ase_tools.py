@@ -132,3 +132,38 @@ class TurboGAP(Calculator):
         self.results['energy'] = atoms_temp.get_potential_energy()
         self.results['forces'] = atoms_temp.get_forces()
 ###############################################################################################
+#
+# This function finds the closest plane to a given set of atoms, according to minimizing the
+# sum of the distances. One should provide a "compact" representation of the atoms, i.e., a
+# periodic image should contain the compact representation where the atoms are close to one
+# another, e.g., for a molecule the atoms should all be within bonding distances without the
+# need to take PBC into account. This means the user may need to place some atoms outside
+# the central unit cell.
+# The user can pass a mask to prevent using some of the atoms. E.g., if one wants to leave
+# hydrogen atoms out, pass mask=["H"]. You can also pass an array, like mask=[T, F, F, T].
+#
+def find_best_plane(atoms, mask=None):
+    if mask is not None:
+        try:
+            if all([type(el) == str for el in mask]): # this uses an element-based mask
+                new_mask = []
+                for i in range(0, len(atoms)):
+                    if atoms[i].symbol in mask:
+                        new_mask.append(True)
+                    else:
+                        new_mask.append(False)
+                mask = new_mask
+            elif all([type(el) == bool for el in mask]):
+                pass
+        except:
+            raise Exception("Your mask must be an array or list containing either 1) element tags (e.g., ['H', 'Fe']) or 2) True|False for each atom")
+    else:
+        mask = [False for atom in atoms]
+    positions = []
+    for i in range(0, len(atoms)):
+        if not mask[i]:
+            positions.append(atoms.positions[i])
+    # Plane vector is obtained from the singular-value decomposition
+    vect = np.linalg.svd(np.transpose(positions))[0][:, -1]
+    return vect
+###############################################################################################
